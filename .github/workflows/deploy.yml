@@ -1,0 +1,32 @@
+name: Deploy to Branch
+on:
+  push:
+    branches:
+      - main  # 仅在 main 分支提交时触发
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # # 1. 执行你的自定义脚本（如果有的话）
+      # - name: Run Bash Script
+      #   run: |
+      #     chmod +x ./my-script.sh
+      #     ./my-script.sh
+
+      # 2. 转换 README 为 index.html
+      - name: Convert Markdown to HTML
+        run: |
+          docker run --rm -v "$(pwd):/data" pandoc/core README.md -o index.html --standalone
+
+      # 3. 将 index.html 部署到 deploy 分支
+      - name: Deploy to Branch
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: deploy  # 目标分支名
+          publish_dir: ./         # 要上传的目录
+          destination_dir: ./     # 在目标分支中的路径
